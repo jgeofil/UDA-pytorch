@@ -93,8 +93,7 @@ def run(output_path, config):
 
     def cycle(iterable):
         while True:
-            for i in iterable:
-                yield i
+            yield from iterable
 
     train_unlabelled_loader_iter = cycle(train_unlabelled_loader)
 
@@ -248,13 +247,13 @@ def run(output_path, config):
     def mlflow_batch_metrics_logging(engine, tag):
         step = trainer.state.iteration
         for name, value in engine.state.metrics.items():
-            mlflow.log_metric("{} {}".format(tag, name), value, step=step)
+            mlflow.log_metric(f"{tag} {name}", value, step=step)
 
     def mlflow_val_metrics_logging(engine, tag):
         step = trainer.state.epoch
         for name in metrics.keys():
             value = engine.state.metrics[name]
-            mlflow.log_metric("{} {}".format(tag, name), value, step=step)
+            mlflow.log_metric(f"{tag} {name}", value, step=step)
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, mlflow_batch_metrics_logging, "train")
     train_evaluator.add_event_handler(Events.COMPLETED, mlflow_val_metrics_logging, "train")
@@ -266,7 +265,7 @@ def run(output_path, config):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser("Training a CNN on a dataset")
-    
+
     parser.add_argument('dataset', type=str, choices=['CIFAR10', 'CIFAR100'],
                         help="Training/Testing dataset")
 
@@ -278,16 +277,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    dataset_name = args.dataset    
+    dataset_name = args.dataset
     network_name = args.network    
-    
-    print("Train {} on {}".format(network_name, dataset_name))    
-    print("- PyTorch version: {}".format(torch.__version__))
-    print("- Ignite version: {}".format(ignite.__version__))
-    
+
+    print(f"Train {network_name} on {dataset_name}")
+    print(f"- PyTorch version: {torch.__version__}")
+    print(f"- Ignite version: {ignite.__version__}")
+
     assert torch.cuda.is_available()
     torch.backends.cudnn.benchmark = True
-    print("- CUDA version: {}".format(torch.version.cuda))
+    print(f"- CUDA version: {torch.version.cuda}")
 
     batch_size = 64
     num_epochs = 200
@@ -304,7 +303,7 @@ if __name__ == "__main__":
         "num_workers": 10,
 
         "num_epochs": num_epochs,
-        
+
         "learning_rate": 0.03,
         "min_lr_ratio": 0.004,
         "num_warmup_steps": 0,

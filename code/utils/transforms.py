@@ -22,7 +22,7 @@ def erase(img, i, j, h, w, v, inplace=False):
         Tensor Image: Erased image.
     """
     if not isinstance(img, torch.Tensor):
-        raise TypeError('img should be Tensor Image. Got {}'.format(type(img)))
+        raise TypeError(f'img should be Tensor Image. Got {type(img)}')
 
     if not inplace:
         img = img.clone()
@@ -83,7 +83,7 @@ class RandomErasing(object):
         img_c, img_h, img_w = img.shape
         area = img_h * img_w
 
-        for attempt in range(10):
+        for _ in range(10):
             erase_area = random.uniform(scale[0], scale[1]) * area
             aspect_ratio = random.uniform(ratio[0], ratio[1])
 

@@ -3,7 +3,10 @@ from torchvision import datasets
 
 def get_train_test_datasets(dataset_name, path):
 
-    assert dataset_name in datasets.__dict__, "Unknown dataset name {}".format(dataset_name)
+    assert (
+        dataset_name in datasets.__dict__
+    ), f"Unknown dataset name {dataset_name}"
+
     fn = datasets.__dict__[dataset_name]
 
     train_ds = fn(root=path, train=True, download=True)

@@ -15,7 +15,7 @@ class TrainingSignalAnnealing:
         self._step += 1
 
         if step >= len(self.thresholds) or step < 0:
-            warnings.warn("Step {} is out of bounds".format(step))
+            warnings.warn(f"Step {step} is out of bounds")
             return y_pred, y
 
         t = self.thresholds[step].item()
@@ -27,6 +27,13 @@ class TrainingSignalAnnealing:
         if mask.sum() > 0:            
             return y_pred[mask], y[mask]
 
-        warnings.warn("Threshold {} is too low, all predictions are discarded.\n".format(t) +
-                      "y_pred.min/max: {}, {}".format(tmp_y_pred.min(), tmp_y_pred.max()))
+        warnings.warn(
+            (
+                "Threshold {} is too low, all predictions are discarded.\n".format(
+                    t
+                )
+                + f"y_pred.min/max: {tmp_y_pred.min()}, {tmp_y_pred.max()}"
+            )
+        )
+
         return y_pred, y

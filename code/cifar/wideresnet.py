@@ -60,12 +60,12 @@ def resnet(depth, width, num_classes):
     set_requires_grad_except_bn_(flat_params)
 
     def block(x, params, base, mode, stride):
-        o1 = F.relu(batch_norm(x, params, base + '-bn0', mode), inplace=True)
-        y = F.conv2d(o1, params[base + '-conv0'], stride=stride, padding=1)
-        o2 = F.relu(batch_norm(y, params, base + '-bn1', mode), inplace=True)
-        z = F.conv2d(o2, params[base + '-conv1'], stride=1, padding=1)
-        if base + '-convdim' in params:
-            return z + F.conv2d(o1, params[base + '-convdim'], stride=stride)
+        o1 = F.relu(batch_norm(x, params, f'{base}-bn0', mode), inplace=True)
+        y = F.conv2d(o1, params[f'{base}-conv0'], stride=stride, padding=1)
+        o2 = F.relu(batch_norm(y, params, f'{base}-bn1', mode), inplace=True)
+        z = F.conv2d(o2, params[f'{base}-conv1'], stride=1, padding=1)
+        if f'{base}-convdim' in params:
+            return z + F.conv2d(o1, params[f'{base}-convdim'], stride=stride)
         else:
             return z + x
 
@@ -108,11 +108,14 @@ def flatten(params):
 
 
 def batch_norm(x, params, base, mode):
-    return F.batch_norm(x, weight=params[base + '-weight'],
-                        bias=params[base + '-bias'],
-                        running_mean=params[base + '-running_mean'],
-                        running_var=params[base + '-running_var'],
-                        training=mode)
+    return F.batch_norm(
+        x,
+        weight=params[f'{base}-weight'],
+        bias=params[f'{base}-bias'],
+        running_mean=params[f'{base}-running_mean'],
+        running_var=params[f'{base}-running_var'],
+        training=mode,
+    )
 
 
 def set_requires_grad_except_bn_(params):

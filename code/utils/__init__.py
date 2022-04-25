@@ -29,7 +29,7 @@ def get_train_test_loaders(dataset_name, path, num_labelled_samples, batch_size,
     if "cifar" in dataset_name.lower():
         train_ds, test_ds, num_classes = get_cifar_train_test_datasets(dataset_name, path)
     else:
-        raise RuntimeError("Unknown dataset '{}'".format(dataset_name))
+        raise RuntimeError(f"Unknown dataset '{dataset_name}'")
 
     train_labelled_ds, train_unlabelled_ds = \
         stratified_train_labelled_unlabelled_split(train_ds, 
@@ -84,7 +84,7 @@ def get_uda2_train_test_loaders(dataset_name, path, num_labelled_samples, batch_
     if "cifar" in dataset_name.lower():
         train_ds, test_ds, num_classes = get_cifar_train_test_datasets(dataset_name, path)
     else:
-        raise RuntimeError("Unknown dataset '{}'".format(dataset_name))
+        raise RuntimeError(f"Unknown dataset '{dataset_name}'")
 
     train1_ds, train2_ds = stratified_train_labelled_unlabelled_split(train_ds, 
                                                                       num_labelled_samples=num_labelled_samples, 
@@ -145,7 +145,7 @@ def get_model(name):
     elif name in wideresnet.__dict__:
         fn = wideresnet.__dict__[name]
     else:
-        raise RuntimeError("Unknown model name {}".format(name))
+        raise RuntimeError(f"Unknown model name {name}")
 
     return fn()
 
@@ -174,10 +174,7 @@ class UDATransform:
         self.copy = copy
 
     def __call__(self, dp):        
-        if self.copy:
-            aug_dp = dp.copy()
-        else:
-            aug_dp = dp
+        aug_dp = dp.copy() if self.copy else dp
         tdp1 = self.original_transform(dp)
         tdp2 = self.augmentation_transform(aug_dp)
         return tdp1, tdp2 
@@ -186,17 +183,17 @@ class UDATransform:
 def stratified_train_labelled_unlabelled_split(ds, num_labelled_samples, num_classes, seed=None):
     labelled_indices = []
     unlabelled_indices = []
-    
+
     if seed is not None:
         np.random.seed(seed)
 
     indices = np.random.permutation(len(ds))
-    
+
     class_counters = list([0] * num_classes)
     max_counter = num_labelled_samples // num_classes
     for i in indices:
         dp = ds[i]        
-        
+
         if num_labelled_samples < sum(class_counters):
             unlabelled_indices.append(i)
         else:
@@ -208,9 +205,11 @@ def stratified_train_labelled_unlabelled_split(ds, num_labelled_samples, num_cla
             else:
                 unlabelled_indices.append(i)
 
-    assert len(set(labelled_indices) & set(unlabelled_indices)) == 0, \
-        "{}".format(set(labelled_indices) & set(unlabelled_indices))
-    
+    assert (
+        len(set(labelled_indices) & set(unlabelled_indices)) == 0
+    ), f"{set(labelled_indices) & set(unlabelled_indices)}"
+
+
     train_labelled_ds = Subset(ds, labelled_indices)
     train_unlabelled_ds = Subset(ds, unlabelled_indices)
     return train_labelled_ds, train_unlabelled_ds
